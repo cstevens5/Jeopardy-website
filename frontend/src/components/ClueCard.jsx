@@ -17,13 +17,9 @@ const Text = styled.span`
   color: #ffd700;
 `;
 
-const ClueCard = ({ clue }) => {
-  {
-    /* implement functionality to display modal */
-  }
-
+const ClueCard = ({ clue, onClick }) => {
   return (
-    <Container>
+    <Container onClick={onClick}>
       <Text>${clue.value}</Text>
     </Container>
   );

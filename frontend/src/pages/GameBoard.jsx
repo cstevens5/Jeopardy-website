@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import Column from "../components/Column";
 import Modal from "../components/Modal";
+import { useState } from "react";
 
 const Container = styled.div`
   display: flex;
@@ -75,13 +76,30 @@ const data = [
 ];
 
 const GameBoard = () => {
+  const [selectedClue, setSelectedClue] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const handleClueClick = (clue) => {
+    setSelectedClue(clue);
+    setShowModal(true);
+  };
+
   return (
-    <Container>
-      {data.map((element, index) => (
-        <Column key={index} category={element.category} clues={element.clues} />
-      ))}
-      {/* <Modal clue={data[0].clues[0].clue} /> */}
-    </Container>
+    <>
+      <Container>
+        {data.map((element, index) => (
+          <Column
+            key={index}
+            category={element.category}
+            clues={element.clues}
+            onClueClick={handleClueClick}
+          />
+        ))}
+      </Container>
+      {showModal && selectedClue && (
+        <Modal clue={selectedClue} onClose={() => setShowModal(false)} />
+      )}
+    </>
   );
 };
 
