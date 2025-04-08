@@ -2,6 +2,7 @@ import styled from "styled-components";
 import Column from "../components/Column";
 import Modal from "../components/Modal";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -28,6 +29,7 @@ const GameBoard = () => {
   const [clues, setClues] = useState([]);
   const [answeredClues, setAnsweredClues] = useState({}); // clue id -> bool correct answer
   const [score, setScore] = useState(0);
+  const [answeredCount, setAnsweredCount] = useState(0);
 
   const handleClueClick = (clue) => {
     // prevent the user from answer the same clue multiple times
@@ -40,13 +42,21 @@ const GameBoard = () => {
 
   // function to update the answeredClues map
   const handleAnswer = (clue, isCorrect) => {
+    // add to the answered clues map
     setAnsweredClues((prev) => ({
       ...prev,
       [clue.id]: isCorrect,
     }));
+
+    // update the score
     if (isCorrect) setScore(score + clue.value);
     else setScore(score - clue.value);
+
+    // update the number of clues that have been answered
+    setAnsweredClues(answeredClues + 1);
   };
+
+  const playDoubleJeopardy = () => {};
 
   // get the clues for a selected game - placeholder, gameid 1
   useEffect(() => {
@@ -89,6 +99,17 @@ const GameBoard = () => {
           onClose={() => setShowModal(false)}
           handleAnswer={handleAnswer}
         />
+      )}
+      {answeredClues === clues.length && (
+        <InterimDisplay>
+          <DisplayText>Would you like to play Double Jeopardy?</DisplayText>
+          <ButtonContainer>
+            <Button onClick={playDoubleJeopardy}>Yes</Button>
+            <Link to="/summary">
+              <Button>No</Button>
+            </Link>
+          </ButtonContainer>
+        </InterimDisplay>
       )}
     </>
   );
