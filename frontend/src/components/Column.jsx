@@ -9,12 +9,17 @@ const Container = styled.div`
   width: 14vw;
 `;
 
-const Column = ({ category, clues, onClueClick }) => {
+const Column = ({ category, clues, onClueClick, answeredClues }) => {
   return (
     <Container>
       <CategoryCard category={category} />
       {clues.map((clue, index) => (
-        <ClueCard key={index} clue={clue} onClick={() => onClueClick(clue)} />
+        <ClueCard
+          key={index}
+          clue={clue}
+          onClick={() => onClueClick(clue)}
+          isCorrect={clue.id in answeredClues ? answeredClues[clue.id] : null}
+        />
       ))}
     </Container>
   );

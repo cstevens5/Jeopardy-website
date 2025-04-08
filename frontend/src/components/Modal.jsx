@@ -15,7 +15,7 @@ const Overlay = styled.div`
   z-index: 9999;
 `;
 
-const Container = styled.div`
+const Container = styled.form`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -49,9 +49,10 @@ const Button = styled.button`
   border-radius: 12px;
 `;
 
-const Modal = ({ clue, onClose }) => {
+const Modal = ({ clue, onClose, handleAnswer }) => {
   const [inputResponse, setInputResponse] = useState("");
   const stopwords = ["the", "a", "an", "of", "in", "on", "at", "to"];
+  const [feedback, setFeedback] = useState("");
 
   const normalizeText = (text) => {
     return text
@@ -70,29 +71,36 @@ const Modal = ({ clue, onClose }) => {
     return answerWords.every((word) => userWords.includes(word));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     const isCorrect = isCorrectResponse(inputResponse, clue.response);
+    handleAnswer(clue, isCorrect);
 
     if (isCorrect) {
-      alert("Correct!");
+      setFeedback("✅ Correct!");
     } else {
-      alert(`Incorrect, the correct resonse was: ${clue.response}`);
+      setFeedback(`❌ Incorrect! Correct answer: ${clue.response}`);
     }
 
-    onClose();
+    // Hide feedback and modal after 2 seconds
+    setTimeout(() => {
+      setFeedback("");
+      onClose();
+    }, 2000);
   };
 
   return (
     <Overlay onClick={onClose}>
-      <Container onClick={(e) => e.stopPropagation()}>
+      <Container onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
         <Text>{clue.clue}</Text>
         <Textbox
           type="text"
           onChange={(e) => setInputResponse(e.target.value)}
         />
-        <Button type="submit" onClick={handleSubmit}>
-          Submit
-        </Button>
+        <Button type="submit">Submit</Button>
+        {feedback && (
+          <div style={{ color: "white", fontSize: "20px" }}>{feedback}</div>
+        )}
       </Container>
     </Overlay>
   );

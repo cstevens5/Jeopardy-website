@@ -12,78 +12,40 @@ const Container = styled.div`
   padding: 20px;
 `;
 
-const data = [
-  {
-    category: "History",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-  {
-    category: "Geography",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-  {
-    category: "Literature",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-  {
-    category: "Presidents",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-  {
-    category: "Programming",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-  {
-    category: "Science",
-    clues: [
-      { value: 200, clue: "clue 1" },
-      { value: 400, clue: "clue 2" },
-      { value: 600, clue: "clue 3" },
-      { value: 800, clue: "clue 4" },
-      { value: 1000, clue: "clue 5" },
-    ],
-  },
-];
+const ScoreContainer = styled.div`
+  text-align: center;
+  margin: 20px;
+`;
+
+const ScoreText = styled.span`
+  font-size: 30px;
+`;
 
 const GameBoard = () => {
   const [selectedClue, setSelectedClue] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [clues, setClues] = useState([]);
+  const [answeredClues, setAnsweredClues] = useState({}); // clue id -> bool correct answer
+  const [score, setScore] = useState(0);
 
   const handleClueClick = (clue) => {
+    // prevent the user from answer the same clue multiple times
+    if (answeredClues[clue.id]) {
+      return;
+    }
     setSelectedClue(clue);
     setShowModal(true);
+  };
+
+  // function to update the answeredClues map
+  const handleAnswer = (clue, isCorrect) => {
+    setAnsweredClues((prev) => ({
+      ...prev,
+      [clue.id]: isCorrect,
+    }));
+    if (isCorrect) setScore(score + clue.value);
+    else setScore(score - clue.value);
   };
 
   // get the clues for a selected game - placeholder, gameid 1
@@ -91,9 +53,7 @@ const GameBoard = () => {
     const getClues = async () => {
       try {
         const response = await fetch("/api/clues/grouped/1/J!");
-        console.log(response);
         const data = await response.json();
-        console.log(data);
         setClues(data);
       } catch (err) {
         setError(err);
@@ -116,11 +76,19 @@ const GameBoard = () => {
               category={element.category}
               clues={element.clues}
               onClueClick={handleClueClick}
+              answeredClues={answeredClues}
             />
           ))}
       </Container>
+      <ScoreContainer>
+        <ScoreText>Score: {score}</ScoreText>
+      </ScoreContainer>
       {showModal && selectedClue && (
-        <Modal clue={selectedClue} onClose={() => setShowModal(false)} />
+        <Modal
+          clue={selectedClue}
+          onClose={() => setShowModal(false)}
+          handleAnswer={handleAnswer}
+        />
       )}
     </>
   );

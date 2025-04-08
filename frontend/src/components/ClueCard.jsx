@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #060ce9;
+  background-color: ${(props) => props.color};
   width: 100%;
   height: 100px;
   border: solid;
@@ -17,10 +18,17 @@ const Text = styled.span`
   color: #ffd700;
 `;
 
-const ClueCard = ({ clue, onClick }) => {
+const ClueCard = ({ clue, onClick, isCorrect }) => {
+  // function to set the card color
+  const setColor = () => {
+    if (isCorrect) return "#50C878";
+    else if (isCorrect === false) return "#FF0000";
+    return "#060ce9";
+  };
+
   return (
-    <Container onClick={onClick}>
-      <Text>${clue.value}</Text>
+    <Container onClick={onClick} color={setColor()}>
+      <Text>{isCorrect === null ? `$${clue.value}` : ""}</Text>
     </Container>
   );
 };
