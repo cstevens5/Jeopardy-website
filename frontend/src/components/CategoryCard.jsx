@@ -10,10 +10,11 @@ const Container = styled.div`
   border: solid;
   border-width: 2px;
   border-color: black;
+  text-align: center;
 `;
 
 const Text = styled.span`
-  font-size: 30px;
+  font-size: 20px;
   color: #ffd700;
 `;
 
