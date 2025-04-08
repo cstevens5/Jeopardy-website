@@ -1,5 +1,6 @@
 import express from "express";
 import Clue from "../models/Clue.js";
+import { groupCluesForGame } from "../groupClues.js";
 
 const router = express.Router();
 
@@ -22,6 +23,18 @@ router.get("/game/:id", async (req, res) => {
   } catch (err) {
     console.error("Error fetching clues: ", err);
     res.status(500);
+  }
+});
+
+// get grouped clues by round
+router.get("/grouped/:game_id/:round", async (req, res) => {
+  try {
+    const clues = await Clue.find({ game_id: req.params.game_id });
+    const grouped = groupCluesForGame(clues, req.params.round);
+    res.status(200).json(grouped);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to group clues" });
   }
 });
 
