@@ -28,7 +28,7 @@ const ClueCard = ({ clue, onClick, isCorrect }) => {
 
   return (
     <Container onClick={onClick} color={setColor()}>
-      <Text>{isCorrect === null ? `$${clue.value}` : ""}</Text>
+      {clue.clue && <Text>{isCorrect === null ? `$${clue.value}` : ""}</Text>}
     </Container>
   );
 };

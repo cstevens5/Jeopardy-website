@@ -49,10 +49,11 @@ const Button = styled.button`
   border-radius: 12px;
 `;
 
-const Modal = ({ clue, onClose, handleAnswer }) => {
+const Modal = ({ clue, onClose, handleAnswer, overrideFunc }) => {
   const [inputResponse, setInputResponse] = useState("");
   const stopwords = ["the", "a", "an", "of", "in", "on", "at", "to"];
   const [feedback, setFeedback] = useState("");
+  const [answerRecorded, setAnswerRecorded] = useState(false);
 
   const normalizeText = (text) => {
     return text
@@ -75,6 +76,7 @@ const Modal = ({ clue, onClose, handleAnswer }) => {
     e.preventDefault();
     const isCorrect = isCorrectResponse(inputResponse, clue.response);
     handleAnswer(clue, isCorrect);
+    setAnswerRecorded(true);
 
     if (isCorrect) {
       setFeedback("✅ Correct!");
@@ -89,6 +91,16 @@ const Modal = ({ clue, onClose, handleAnswer }) => {
     }, 2000);
   };
 
+  const handleOverride = () => {
+    if (!answerRecorded) return;
+    overrideFunc(clue);
+    setFeedback("✅ Correct! (Override)");
+    setTimeout(() => {
+      setFeedback("");
+      onClose();
+    }, 1500);
+  };
+
   return (
     <Overlay onClick={onClose}>
       <Container onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
@@ -99,7 +111,12 @@ const Modal = ({ clue, onClose, handleAnswer }) => {
         />
         <Button type="submit">Submit</Button>
         {feedback && (
-          <div style={{ color: "white", fontSize: "20px" }}>{feedback}</div>
+          <>
+            <div style={{ color: "white", fontSize: "20px" }}>{feedback}</div>
+            {feedback.includes("Incorrect") && (
+              <Button onClick={handleOverride}>I was Correct</Button>
+            )}
+          </>
         )}
       </Container>
     </Overlay>

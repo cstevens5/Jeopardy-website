@@ -18,7 +18,9 @@ const Column = ({ category, clues, onClueClick, answeredClues }) => {
           key={index}
           clue={clue}
           onClick={() => onClueClick(clue)}
-          isCorrect={clue.id in answeredClues ? answeredClues[clue.id] : null}
+          isCorrect={
+            clue.id in answeredClues ? answeredClues[clue.id].isCorrect : null
+          }
         />
       ))}
     </Container>
