@@ -56,14 +56,37 @@ const Home = () => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // check which method we are using to determine the game
     if (enterMethod === "gameid") {
       navigate(`/gameboard/${input}`);
-    } else {
+    } else if (enterMethod === "airdate") {
       navigate(`/gameboard?airdate=${input}`);
+    }
+  };
+
+  const handleRandomGame = async () => {
+    try {
+      const response = await fetch(`/api/games/random`);
+
+      if (!response.ok) {
+        console.log("Error fetching random game");
+        return;
+      }
+
+      const data = await response.json();
+      const game_id = data.game_id;
+
+      if (!game_id) {
+        console.log("Random game ID not found in response");
+        return;
+      }
+
+      navigate(`/gameboard/${game_id}`);
+    } catch (err) {
+      console.error("Failed to fetch random game: ", err);
     }
   };
 
@@ -79,6 +102,7 @@ const Home = () => {
           <Button onClick={() => setEnterMethod("airdate")}>
             Enter Air Date
           </Button>
+          <Button onClick={handleRandomGame}>Play Random Game</Button>
         </ButtonContainer>
       )}
       {enterMethod === "gameid" && (
