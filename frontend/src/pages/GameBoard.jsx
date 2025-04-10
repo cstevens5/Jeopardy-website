@@ -63,6 +63,10 @@ const GameBoard = () => {
   const [round, setRound] = useState("J!");
   const [showDoublePrompt, setShowDoublePrompt] = useState(false);
   const navigate = useNavigate();
+  const totalClueCount = clues.reduce((acc, col) => {
+    const validClues = col.clues.filter((clue) => clue && clue.clue);
+    return acc + validClues.length;
+  }, 0);
 
   const handleClueClick = (clue) => {
     // prevent the user from answer the same clue multiple times
@@ -124,10 +128,6 @@ const GameBoard = () => {
     const newCount = answeredCount + 1;
     setAnsweredCount(newCount);
 
-    const totalClueCount = clues.reduce(
-      (acc, col) => acc + col.clues.length,
-      0,
-    );
     if (newCount === totalClueCount) {
       // Wait until modal fully closes
       setTimeout(() => {
