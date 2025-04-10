@@ -65,4 +65,20 @@ router.get("/grouped/:airdate/:round", async (req, res) => {
   }
 });
 
+// route to get a random game
+router.get("/random", async (req, res) => {
+  try {
+    const [random_game] = await Game.aggregate([{ $sample: { size: 1 } }]);
+
+    if (!random_game) {
+      return res.status(404).json({ error: "No games found" });
+    }
+
+    res.status(200).json({ game_id: random_game.id });
+  } catch (err) {
+    console.error("Error selecting random game:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default router;
