@@ -49,7 +49,7 @@ const Button = styled.button`
   border-radius: 12px;
 `;
 
-const Modal = ({ clue, onClose, handleAnswer, overrideFunc }) => {
+const Modal = ({ clue, onClose, handleAnswer, overrideFunc, onComplete }) => {
   const [inputResponse, setInputResponse] = useState("");
   const stopwords = ["the", "a", "an", "of", "in", "on", "at", "to"];
   const [feedback, setFeedback] = useState("");
@@ -88,6 +88,7 @@ const Modal = ({ clue, onClose, handleAnswer, overrideFunc }) => {
     setTimeout(() => {
       setFeedback("");
       onClose();
+      onComplete();
     }, 2000);
   };
 

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import Column from "../components/Column";
 import Modal from "../components/Modal";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -22,13 +22,31 @@ const ScoreText = styled.span`
   font-size: 30px;
 `;
 
-const InterimDisplay = styled.div``;
+const InterimDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  gap: 20px;
+`;
 
-const DisplayText = styled.span``;
+const DisplayText = styled.span`
+  font-size: 30px;
+`;
 
-const ButtonContainer = styled.div``;
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+`;
 
-const Button = styled.button``;
+const Button = styled.button`
+  font-size: 20px;
+  padding: 5px;
+`;
 
 const GameBoard = () => {
   const [selectedClue, setSelectedClue] = useState(null);
@@ -42,6 +60,9 @@ const GameBoard = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search);
   const airdate = query.get("airdate");
+  const [round, setRound] = useState("J!");
+  const [showDoublePrompt, setShowDoublePrompt] = useState(false);
+  const navigate = useNavigate();
 
   const handleClueClick = (clue) => {
     // prevent the user from answer the same clue multiple times
@@ -69,7 +90,7 @@ const GameBoard = () => {
     setScore((prev) => prev + (isCorrect ? clue.value : -clue.value));
 
     // update the number of clues that have been answered
-    setAnsweredCount(answeredCount + 1);
+    setAnsweredCount((prev) => prev + 1);
   };
 
   // function to handle overriding a response marked incorrect
@@ -90,7 +111,34 @@ const GameBoard = () => {
     }));
   };
 
-  const playDoubleJeopardy = () => {};
+  const playDoubleJeopardy = (e) => {
+    e.preventDefault();
+    // don't display the double jeopardy prompt anymore
+    setShowDoublePrompt(false);
+    // set the round
+    setRound("DJ!");
+    setAnsweredCount(0);
+  };
+
+  const onComplete = () => {
+    const newCount = answeredCount + 1;
+    setAnsweredCount(newCount);
+
+    const totalClueCount = clues.reduce(
+      (acc, col) => acc + col.clues.length,
+      0,
+    );
+    if (newCount === totalClueCount) {
+      // Wait until modal fully closes
+      setTimeout(() => {
+        if (round === "J!") {
+          setShowDoublePrompt(true);
+        } else {
+          navigate("/summary");
+        }
+      }, 200); // slight delay after modal closes
+    }
+  };
 
   // get the clues for a selected game - placeholder, gameid 1
   useEffect(() => {
@@ -98,9 +146,9 @@ const GameBoard = () => {
       let response;
       try {
         if (gameid) {
-          response = await fetch(`/api/clues/grouped/${gameid}/J!`);
+          response = await fetch(`/api/clues/grouped/${gameid}/${round}`);
         } else if (airdate) {
-          response = await fetch(`/api/games/grouped/${airdate}/J!`);
+          response = await fetch(`/api/games/grouped/${airdate}/${round}`);
         } else {
           setError("No gameId or airdate provided");
         }
@@ -123,7 +171,7 @@ const GameBoard = () => {
     };
 
     getClues();
-  }, [gameid, airdate]);
+  }, [gameid, airdate, round]);
 
   // if an error was encountered - display the error
   if (error) {
@@ -131,30 +179,35 @@ const GameBoard = () => {
   }
   return (
     <>
-      <Container>
-        {clues.length > 0 &&
-          clues.map((element, index) => (
-            <Column
-              key={index}
-              category={element.category}
-              clues={element.clues}
-              onClueClick={handleClueClick}
-              answeredClues={answeredClues}
+      {!showDoublePrompt && (
+        <>
+          <Container>
+            {clues.length > 0 &&
+              clues.map((element, index) => (
+                <Column
+                  key={index}
+                  category={element.category}
+                  clues={element.clues}
+                  onClueClick={handleClueClick}
+                  answeredClues={answeredClues}
+                />
+              ))}
+          </Container>
+          <ScoreContainer>
+            <ScoreText>Score: {score}</ScoreText>
+          </ScoreContainer>
+          {showModal && selectedClue && (
+            <Modal
+              clue={selectedClue}
+              onClose={() => setShowModal(false)}
+              handleAnswer={handleAnswer}
+              overrideFunc={handleOverride}
+              onComplete={onComplete}
             />
-          ))}
-      </Container>
-      <ScoreContainer>
-        <ScoreText>Score: {score}</ScoreText>
-      </ScoreContainer>
-      {showModal && selectedClue && (
-        <Modal
-          clue={selectedClue}
-          onClose={() => setShowModal(false)}
-          handleAnswer={handleAnswer}
-          overrideFunc={handleOverride}
-        />
+          )}
+        </>
       )}
-      {answeredCount === clues.length && (
+      {showDoublePrompt && (
         <InterimDisplay>
           <DisplayText>Would you like to play Double Jeopardy?</DisplayText>
           <ButtonContainer>
